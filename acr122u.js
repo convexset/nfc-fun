@@ -58,7 +58,7 @@ ACR122U.prepareReader = function prepareReader({
 				if ((changes & context.SCARD_STATE_EMPTY) && (status.state & context.SCARD_STATE_EMPTY)) {
 					// card removed
 					if (debugMode) {
-						console.log(`[${reader.name}] Card Removed.`);
+						console.log(`[${reader.name}] Card Not Present/Removed.`);
 					}
 					reader.disconnect(reader.SCARD_LEAVE_CARD, function(error) {
 						if (error) {

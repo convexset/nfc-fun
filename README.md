@@ -10,6 +10,14 @@ Presently, I don't know the difference between "transmit" and "control", so... S
 
 ## Getting Started
 
+The easiest thing to do is to start with:
+
+```
+npm run demo
+```
+
+... and then look at the code in `demo.js`.
+
 It's not quite a NPM package yet, but this is how working with it looks:
 
 ```javascript

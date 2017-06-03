@@ -21,7 +21,7 @@ const checkForTagMatch = buffer => {
 			console.log();
 			if (name === 'tagRed-aka-EXIT') {
 				console.log('We are done here.')
-				throw new Error('exiting');
+				throw new Error('tag-based-exit');
 			}
 		}
 	}
@@ -160,13 +160,14 @@ ACR122U.prepareReader({
 		}
 
 		if (false) {
+			// display first 32 pages (32 * 4 bytes)
 			p = p
 				.then(readChunks(0, 32));
 		}
 
 		p = p
 			.catch(e => {
-				if (e && e.message !== 'exiting') {
+				if (e && e.message !== 'tag-based-exit') {
 					console.error(e.stack);
 				}
 				exit();
