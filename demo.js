@@ -11,6 +11,8 @@ const knownTagUIDs = {
 	wreckedNTAG216Card: hexToBuffer('04 4b 77 52 1e 4e 81'),
 };
 
+let seenFamiliarCard = false;
+
 const checkForTagMatch = buffer => {
 	const uidBuffer = ACR122U.ResponseTools.getResponse(buffer);
 	console.log('UID:', uidBuffer);
@@ -19,6 +21,7 @@ const checkForTagMatch = buffer => {
 			console.log();
 			console.log(`UID match for ${name}`);
 			console.log();
+			seenFamiliarCard = true;
 			if (name === 'tagRed-aka-EXIT') {
 				console.log('We are done here.')
 				throw new Error('tag-based-exit');
@@ -27,6 +30,8 @@ const checkForTagMatch = buffer => {
 	}
 	return uidBuffer;
 };
+
+let seenFirstCard = false;
 
 ACR122U.prepareReader({
 	debugMode: true,
@@ -177,7 +182,13 @@ ACR122U.prepareReader({
 		exit();
 	},
 	onCardRemoved: function onDisconnect({ pcsc, reader, status, info, exit }) {
-		exit();
+		if (!seenFirstCard) {
+			console.log('Waiting for item...')
+		} else {
+			if (!seenFamiliarCard) {
+				exit();
+			}
+		}
 	},
 	onCardRemovedError: function onDisconnectError({ error, details, exit }) {
 		exit();
