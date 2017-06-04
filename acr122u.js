@@ -186,7 +186,7 @@ function parseStatus(status) {
 	const parsedStatus = { state: status.state };
 	if (status.atr.length >= 2) {
 		const nHB = status.atr[1] - 0x80;
-		const hb = status.atr.slice(4, nHB);
+		const hb = status.atr.slice(4, 4 + nHB);
 
 		const checkDigit = status.atr[4 + nHB];
 		const expectedCheckDigit = computeCheckDigit(status.atr.slice(1, 3 + nHB));
