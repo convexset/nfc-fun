@@ -251,6 +251,7 @@ function connect(reader, mode) {
 function hexToBuffer(hexString) {
 	return new Buffer(hexString.replace(/[^0-9a-fA-F]/g, '').toUpperCase(), 'hex');
 }
+
 function numberToHexDigit(n) {
 	n = n % 256;
 	return `${n < 16 ? '0' : ''}${n.toString(16)}`;
@@ -274,6 +275,11 @@ ACR122U.Commands = {
 	setPICCOperatingParameter: (piccOperatingParameter) => hexToBuffer(`FF 00 51 ${numberToHexDigit(piccOperatingParameter)} 00`),
 	setTimeoutParameter: (timeoutParameter) => hexToBuffer(`FF 00 41 ${numberToHexDigit(timeoutParameter)} 00`),
 	setBuzzerActivityOnDetection: (buzzerOn) => hexToBuffer(`FF 00 52 ${numberToHexDigit(!!buzzerOn ? 0xFF : 0x00)} 00`),
+	antennaPowerOff: hexToBuffer('FF 00 00 00 04 D4 32 01 00'),
+	antennaPowerOn: hexToBuffer('FF 00 00 00 04 D4 32 01 01'),
+	iso7814Part4Command: (cmdClass, ins, p1, p2, data, lenExpectedResponse) => Buffer.concat([hexToBuffer(`${numberToHexDigit(cmdClass)} ${numberToHexDigit(ins)} ${numberToHexDigit(p1)} ${numberToHexDigit(p2)}`), data, hexToBuffer(`${numberToHexDigit(lenExpectedResponse)}`)]),
+	getInterfaceStatus: hexToBuffer('FF 00 00 00 02 D4 04'),
+	getChallenge: hexToBuffer('00 84 00 00 08'),
 };
 
 ACR122U.Constants = {
@@ -313,6 +319,73 @@ ACR122U.ResponseCodes = [
 ];
 
 ACR122U.ResponseTools = Object.freeze({
+	parseInterfaceStatus: function parseInterfaceStatus(buffer) {
+		if (!!buffer) {
+			nbTag = buffer[4]
+			if (nbTag === 0) {
+				return {
+					haveTag: false,
+				}
+			} else {
+				const status = {
+					haveTag: true,
+					err: buffer[2],
+					field: buffer[3],
+					nbTag: nbTag,
+					tg: buffer[5],
+					brRx: buffer[6],
+					brTx: buffer[7],
+					type: buffer[8],
+				};
+
+				switch (status.err) {
+					case 0:
+						status.err_interpretation = 'No external RF field present and detected';
+						break;
+					case 1:
+						status.err_interpretation = 'External RF field present and detected';
+						break;
+					default:
+						status.err_interpretation = null;
+				}
+
+				['brRx', 'brTx'].forEach(p => {
+					switch (status[p]) {
+						case 0:
+							status[`${p}_kbps`] = 106;
+							break;
+						case 1:
+							status[`${p}_kbps`] = 212;
+							break;
+						case 2:
+							status[`${p}_kbps`] = 424;
+							break;
+						default:
+							status[`${p}_kbps`] = null;
+					}
+				});
+
+				switch (status.type) {
+					case 0:
+						status.type_interpretation = 'ISO 14443 or MIFARE';
+						break;
+					case 1:
+						status.type_interpretation = 'Active Mode';
+						break;
+					case 2:
+						status.type_interpretation = 'Innovision Jewel Tag';
+						break;
+					case 0x10:
+						status.type_interpretation = 'FeliCa';
+						break;
+					default:
+						status.type_interpretation = null;
+				}
+
+				return status;
+			}
+		}
+	},
 	getResponseCode: function getResponseCode(buffer) {
 		const code = buffer.slice(buffer.length - 2, buffer.length);
 		for (let i = 0; i < ACR122U.ResponseCodes.length; i++) {

@@ -61,6 +61,10 @@ This little fella contains the following commands:
  - `getUID`: (4.1 in API)
  - `getFirmwareVersion`: (6.3 in API)
  - `getPICCOperatingParameter`: (6.4 in API)
+ - `antennaPowerOff`: (7.0 in API)
+ - `antennaPowerOn`: (7.0 in API)
+ - `getInterfaceStatus`: (7.5 in API)
+ - `getChallenge`: (pg 39 in API)
 
 ... and functions for generating commands:
 
@@ -76,6 +80,7 @@ This little fella contains the following commands:
  - `setPICCOperatingParameter(piccOperatingParameter)`: (6.5 in API)
  - `setTimeoutParameter(timeoutParameter)`: (6.6 in API)
  - `setBuzzerActivityOnDetection(buzzerOn)`: (6.7 in API)
+ - `iso7814Part4Command`: (7.1 in API)
 
 ## Utilities
 

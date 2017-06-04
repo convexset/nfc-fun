@@ -33,12 +33,16 @@ const checkForTagMatch = buffer => {
 
 let seenFirstCard = false;
 
+const debugMode = true;
 ACR122U.prepareReader({
-	debugMode: true,
+	debugMode: debugMode,
 	onConnect: function onConnect({ pcsc, reader, status, info, protocol, transmit, control, exit }) {
 
-		console.log(`[${reader.name}] Reader:`, reader);
-		console.log(`[${reader.name}] Status Info:`, info);
+		if (!debugMode) {
+			console.log(`[${reader.name}] Reader:`, reader);
+			console.log(`[${reader.name}] Status Info:`, info);
+			console.log(`[${reader.name}] Protocol:`, protocol);
+		}
 
 		seenFirstCard = true;
 
@@ -132,6 +136,13 @@ ACR122U.prepareReader({
 			// .then(transmit({ name: 'Buzz Around (Off)', command: ACR122U.Commands.ledAndBuzzerControl(0x00, 1, 1, 1, ACR122U.Constants.BUZZER_OFF) }))
 			.then(transmit({ name: 'Turn Buzzer Off On Detection', command: ACR122U.Commands.setBuzzerActivityOnDetection(false) }))
 			// .then(transmit({ name: 'Turn Buzzer On On Detection', command: ACR122U.Commands.setBuzzerActivityOnDetection(true) }))
+			.then(transmit({ name: 'Get Interface Status', command: ACR122U.Commands.getInterfaceStatus }))
+			.then(ACR122U.ResponseTools.getResponse)
+			.then(ACR122U.ResponseTools.parseInterfaceStatus)
+			.then(r => console.log('Interface Status:', r))
+			.then(transmit({ name: 'Get Challenge', command: ACR122U.Commands.getChallenge }))
+			// .then(transmit({ name: 'Antenna Power Off', command: ACR122U.Commands.antennaPowerOff }))
+			// .then(transmit({ name: 'Antenna Power On', command: ACR122U.Commands.antennaPowerOn }))
 			.then(ACR122U.promiseTools.wait(0));
 
 		if (false) {
