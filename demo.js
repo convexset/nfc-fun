@@ -40,6 +40,8 @@ ACR122U.prepareReader({
 		console.log(`[${reader.name}] Reader:`, reader);
 		console.log(`[${reader.name}] Status Info:`, info);
 
+		seenFirstCard = true;
+
 		function writeToBlockAndRead(block, delay = 0) {
 			const data = hexToBuffer(`${numberToHexDigit(block * 4)} ${numberToHexDigit(block * 4)} ${numberToHexDigit(block * 4)} ${numberToHexDigit(Math.floor(255 * Math.random()))}`);
 			return () => Promise.resolve()
